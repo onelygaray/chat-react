@@ -2,9 +2,17 @@ import clsx from 'clsx'
 
 import {useUser} from '../context/auth.context'
 
+const userColors = ['blue', 'green', 'red', 'purple', 'orange']
+
 export default function Message({message}) {
   const user = useUser()
   const isAuthUser = message.sender.id === user.id
+  const senderColor = isAuthUser ? 'primary' : getUserColor(message.sender.id)
+
+  function getUserColor(userId) {
+    const index = userId % userColors.length
+    return userColors[index]
+  }
 
   return (
     <div
@@ -13,14 +21,18 @@ export default function Message({message}) {
       })}
     >
       {!isAuthUser && (
-        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-100">
+        <div
+          className={`flex h-8 w-8 items-center justify-center rounded-full bg-${senderColor}-100`}
+        >
           {message.sender.name[0]}
         </div>
       )}
       <div
         className={clsx('rounded-md p-4', {
-          'rounded-bl-none bg-gray-100': !isAuthUser,
-          'rounded-br-none bg-orange-100': isAuthUser,
+          'rounded-bl-none': !isAuthUser,
+          'rounded-br-none': isAuthUser,
+          [`bg-${senderColor}-100`]: !isAuthUser,
+          [`bg-${senderColor}-200`]: isAuthUser,
         })}
       >
         {message.message}

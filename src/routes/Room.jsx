@@ -60,24 +60,33 @@ export default function Room() {
       setReachedBottom(isScrollBottom)
     }
 
-    const unreadMess = messages.filter((message) => !message.read_at).length
+    const unreadMess = messages.filter((message) => !message.read_at && !reachedBottom).length
     setUnreadMessages(unreadMess)
-    // listRef.current.scrollTo(0, listRef.current.scrollHeight)
 
     return () => listener.stopListening('MessageCreated')
-  }, [revalidator, messages])
+  }, [revalidator, messages, reachedBottom])
 
   useEffect(() => {
     if (reachedBottom) {
-      setUnreadMessages(0);
+      setUnreadMessages(0)
     }
-  }, [reachedBottom]);
+  }, [reachedBottom])
+
+  useEffect(() => {
+    if (reachedBottom && listRef.current) {
+      listRef.current.scrollTop = listRef.current.scrollHeight
+    }
+  }, [messages])
 
   return (
     <div className="flex flex-1 flex-col overflow-hidden p-4">
-      <MessageList messages={messages} ref={listRef} />
-      {unreadMessages > 0 && (
-        <div className="flex h-12 w-full items-center justify-center rounded bg-indigo-500 font-bold text-white hover:bg-indigo-600">
+      <MessageList
+        messages={messages}
+        ref={listRef}
+        key={messages.map((message) => message.id).join(',')}
+      />
+      {unreadMessages > 0 && !reachedBottom && (
+        <div className="flex h-12 w-full items-center justify-center text-red-500">
           {unreadMessages} unread messages{' '}
           {!reachedBottom && <button onClick={scrollToBottom}>↓</button>}
         </div>
